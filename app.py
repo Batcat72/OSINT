@@ -300,7 +300,7 @@ def json_to_plaintext(json_data, title=""):
 @app.route("/")
 def index():
     try:
-        filepath=os.path.join(os.getcwd(),"index.html")
+        filepath=os.path.join(os.path.dirname(__file__),"index.html")
         with open(filepath,"r",encoding="utf-8") as f:
             html_content=f.read()
         resp=make_response(html_content,200)
@@ -444,5 +444,5 @@ def virustotal_scan_route():
         return resp
     return jsonify(result)
 if __name__=="__main__":
-    port=int(os.environ.get("PORT",5000))
-    app.run(host="0.0.0.0",port=port,debug=True)
+    port = int(os.environ.get("PORT", 7860))
+    app.run(host="0.0.0.0", port=port)
