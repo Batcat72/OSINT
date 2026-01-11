@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DORA OSINT Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; color: #333; }
+        .container { max-width: 900px; margin-top: 30px; }
+        h1 { color: #2c3e50; margin-bottom: 30px; }
+        .card { margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn { margin-top: 10px; }
+        .result { margin-top: 20px; white-space: pre-wrap; font-size: 12px; max-height: 400px; overflow-y: auto; background: #f5f5f5; padding: 15px; border-radius: 5px; display: none; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .navbar-brand { font-weight: bold; }
+        input, textarea, select { font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">DORA OSINT Tool</h1>
+        
+        <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 rounded">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">OSINT</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('social'); return false;">Social Media</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('openai'); return false;">OpenAI</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('censys'); return false;">Censys</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('phone'); return false;">Phone</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('blockchain'); return false;">Blockchain</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#" onclick="showSection('virustotal'); return false;">VirusTotal</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        
+        <div id="social" class="section active card">
+            <div class="card-body">
+                <h3 class="card-title">Social Media Scraper</h3>
+                <div class="mb-3">
+                    <input type="text" id="username" class="form-control" placeholder="Enter username">
+                </div>
+                <button class="btn btn-primary" onclick="scrapeSocialMedia()">Scrape</button>
+            </div>
+        </div>
+        
+        <div id="openai" class="section card">
+            <div class="card-body">
+                <h3 class="card-title">OpenAI Query</h3>
+                <div class="mb-3">
+                    <textarea id="prompt" class="form-control" rows="3" placeholder="Enter your prompt"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="openaiQuery()">Query</button>
+            </div>
+        </div>
+        
+        <div id="censys" class="section card">
+            <div class="card-body">
+                <h3 class="card-title">Censys Search</h3>
+                <div class="mb-3">
+                    <input type="text" id="query" class="form-control" placeholder="Enter search query">
+                </div>
+                <button class="btn btn-primary" onclick="censysSearch()">Search</button>
+            </div>
+        </div>
+        
+        <div id="phone" class="section card">
+            <div class="card-body">
+                <h3 class="card-title">Phone Lookup</h3>
+                <div class="mb-3">
+                    <input type="text" id="number" class="form-control" placeholder="Enter phone number">
+                </div>
+                <button class="btn btn-primary" onclick="phoneLookup()">Lookup</button>
+            </div>
+        </div>
+        
+        <div id="blockchain" class="section card">
+            <div class="card-body">
+                <h3 class="card-title">Blockchain Tracker</h3>
+                <div class="mb-3">
+                    <select id="network" class="form-control">
+                        <option value="">Select Network</option>
+                        <option value="1">Bitcoin</option>
+                        <option value="2">Ethereum</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <input type="text" id="address" class="form-control" placeholder="Enter wallet address">
+                </div>
+                <button class="btn btn-primary" onclick="blockchainTracker()">Track</button>
+            </div>
+        </div>
+        
+        <div id="virustotal" class="section card">
+            <div class="card-body">
+                <h3 class="card-title">VirusTotal Scan</h3>
+                <div class="mb-3">
+                    <input type="text" id="filepath" class="form-control" placeholder="Enter file path">
+                </div>
+                <button class="btn btn-primary" onclick="virustotalScan()">Scan</button>
+            </div>
+        </div>
+        
+        <div id="result" class="alert alert-info result" style="display:none;"></div>
+    </div>
+
+    <script>
+        // Use relative URLs for API calls (same server)
+        const API_BASE = '';
+
+        function showSection(section) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            const el = document.getElementById(section);
+            if (el) el.classList.add('active');
+            const result = document.getElementById('result');
+            if (result) result.style.display = 'none';
+        }
+
+        async function postData(endpoint, data) {
+            try {
+                const url = `${API_BASE}${endpoint}`;
+                console.log('Fetching:', url);
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) {
+                    return { error: `HTTP ${response.status}: ${response.statusText}` };
+                }
+                const contentType = response.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    return await response.json();
+                } else {
+                    return await response.text();
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                return { error: `Network error: ${error.message}` };
+            }
+        }
+
+        async function scrapeSocialMedia() {
+            const username = document.getElementById('username').value;
+            if (!username) { alert('Please enter a username'); return; }
+            // ask server for plain text human-friendly report
+            const result = await postData('/scrape_social_media', { username, plain: true });
+            displayResult(result);
+        }
+
+        async function openaiQuery() {
+            const prompt = document.getElementById('prompt').value;
+            if (!prompt) { alert('Please enter a prompt'); return; }
+            const result = await postData('/openai_query', { prompt, plain: true });
+            displayResult(result);
+        }
+
+        async function censysSearch() {
+            const query = document.getElementById('query').value;
+            if (!query) { alert('Please enter a query'); return; }
+            const result = await postData('/censys_search', { query, plain: true });
+            displayResult(result);
+        }
+
+        async function phoneLookup() {
+            const number = document.getElementById('number').value;
+            if (!number) { alert('Please enter a phone number'); return; }
+            const result = await postData('/phone_lookup', { number, plain: true });
+            displayResult(result);
+        }
+
+        async function blockchainTracker() {
+            const network = document.getElementById('network').value;
+            const address = document.getElementById('address').value;
+            if (!network || !address) { alert('Please select network and enter address'); return; }
+            const result = await postData('/blockchain_tracker', { network, address, plain: true });
+            displayResult(result);
+        }
+
+        async function virustotalScan() {
+            const filepath = document.getElementById('filepath').value;
+            if (!filepath) { alert('Please enter a file path'); return; }
+            const result = await postData('/virustotal_scan', { filepath, plain: true });
+            displayResult(result);
+        }
+
+        function displayResult(data) {
+            const resultDiv = document.getElementById('result');
+            if (typeof data === 'string') {
+                resultDiv.innerText = data;
+            } else {
+                resultDiv.innerText = JSON.stringify(data, null, 2);
+            }
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
