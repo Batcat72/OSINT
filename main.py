@@ -36,8 +36,8 @@ from requests.structures import CaseInsensitiveDict
 import hashlib
 import json
 
-app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}, r"/*": {"origins": "*"}})
+main = Flask(__name__)
+CORS(main, resources={r"/api/*": {"origins": "*"}, r"/*": {"origins": "*"}})
 
 @app.after_request
 def after_request(response):
