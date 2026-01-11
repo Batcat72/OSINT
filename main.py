@@ -36,8 +36,8 @@ from requests.structures import CaseInsensitiveDict
 import hashlib
 import json
 
-main = Flask(__name__)
-CORS(main, resources={r"/api/*": {"origins": "*"}, r"/*": {"origins": "*"}})
+app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "*"}, r"/*": {"origins": "*"}})
 
 @app.after_request
 def after_request(response):
@@ -52,6 +52,7 @@ NUMLOOKUP_API_KEY = os.getenv("NUMLOOKUP_API_KEY")
 CENSYS_API_KEY = os.getenv("CENSYS_API_KEY")
 CENSYS_SECRET_KEY = os.getenv("CENSYS_SECRET_KEY")
 VIRUSTOTAL_API_KEY = os.getenv("VIRUSTOTAL_API_KEY")
+INFURA_URL = os.getenv("INFURA_URL")
 
 print("[*] Note: API keys are optional. Some features will require them.")
 print(f"[*] APIFY_API_TOKEN: {'SET' if APIFY_API_TOKEN else 'NOT SET'}")
